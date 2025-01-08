@@ -20,6 +20,7 @@
   **Additional Notes**
   
   <ol>
+  <li>I was responsible for generating fake data in fixture.py, designing/creating the models and their respective functions, building the bash script, aggregating data, and making the aggregate data sheets in ss.py</li>
   <li>For download functionality to work, a folder named "temp" should be in the source directory if not generated during runtime.</li>
   <li>For there to be aggregate data the fixture must be run. If not the view data page and spreadsheet will not work properly.</li>
   </ol>
