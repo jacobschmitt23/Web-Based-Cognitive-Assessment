@@ -1,0 +1,190 @@
+<html>
+
+<head>
+    {% load static %}
+    <script src="https://unpkg.com/htmx.org@2.0.2"
+        integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/0e9972534c.js" crossorigin="anonymous"></script>
+
+
+    <title>PPST Test</title>
+
+    <style>
+
+        .column {
+            padding: 2vmin;
+            background-color: #f9f9f9; 
+            border-radius: 1vmin; 
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
+            margin: 1vmin;
+        }
+        body {
+            font-size: var(--font-size, 3vmin);
+        }
+
+        h1 {
+            font-size: inherit + 0.5;
+            margin: 0.5vmin;
+            width: 100%;
+            position: fixed;
+            /* Keeps header at the top */
+            top: 1rem;
+            background-color: white;
+            z-index: 1;
+            /* Ensures the header stays on top */
+        }
+
+        h2 {
+            font-size: inherit;
+            margin-top: 20vmin;
+        }
+
+        p {
+            font-size: inherit;
+            margin: 0;
+            padding: 0.5%;
+        }
+
+        hr {
+            width: 100%;
+            size: 4;
+            color: black;
+        }
+
+        .font-size-buttons {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 2;
+        }
+
+        .font-size-buttons button {
+            font-size: inherit;
+            padding: 0.5vmin;
+            margin: 0.2vmin;
+            cursor: pointer;
+        }
+
+        .button-container button {
+            display: flex;
+            justify-content: center;
+            padding: 2% 0;
+            width: 40%;
+            font-size: 4vmin;
+            margin: 0 auto;
+            border-radius: 2vmin;
+        }
+
+        .button-container a {
+            text-decoration: none;
+        }
+
+        .button-container button:hover {
+            background-color: #d5d5d5;
+        }
+
+        button i.fas.fa-volume-up {
+            font-size: 2vmin;
+            color: #007bff;
+            transition: color 0.3s ease;
+        }
+
+        button:hover i.fas.fa-volume-up {
+            color: #0056b3;
+        }
+    </style>
+</head>
+
+<body onload="applySavedFontSize()">
+    <div class="font-size-buttons">
+        Adjust font size:
+        <button onclick="increaseFontSize()">+</button>
+        <button onclick="decreaseFontSize()">−</button>
+    </div>
+
+    <h1>
+        Practice Test Conclusion
+
+        <hr style="height: 0.5vmin; background-color: black; border: none; width: 100%;">
+    </h1>
+
+    <div class="column">
+
+        <h2>
+
+            <u>Format</u>
+    
+            <button onclick="playFormat()"
+                style="font-size:3vmin; background:none; border:none; padding:0; cursor:pointer;">
+                <i class="fas fa-volume-up"></i>
+            </button>
+        </h2>
+        <P>
+    
+            The practice has been completed. Starting on the next page and forward, the test will be recorded. Click the
+            “Continue To Test” to begin.
+        </P>
+        <br>
+        
+    </div>
+
+
+    <audio id="format">
+        <source src="/patient/media/audio_practiceConclusion.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        function playFormat() {
+            var audio = document.getElementById('format');
+            audio.play();
+        }
+    </script>
+
+    <script>
+        function increaseFontSize() {
+            document.body.style.setProperty('--font-size', parseFloat(getComputedStyle(document.body).fontSize) * 1.1 + 'px');
+            localStorage.setItem('fontSize', fontSize);
+        }
+
+        function decreaseFontSize() {
+            document.body.style.setProperty('--font-size', parseFloat(getComputedStyle(document.body).fontSize) / 1.1 + 'px');
+            localStorage.setItem('fontSize', fontSize);
+        }
+
+        function applySavedFontSize() {
+            const savedFontSize = localStorage.getItem('fontSize');
+            if (savedFontSize) {
+                document.body.style.setProperty('--font-size', savedFontSize);
+            }
+        }
+    </script>
+
+    <div id="quit-trigger" hx-post="{% url 'patient:isQuit' %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        style="display:none;"></div>
+
+    <script>
+        let isContinuing = false;
+        function setContinuing() {
+            isContinuing = true;
+        }
+        window.addEventListener('beforeunload', function (event) {
+            if (!isContinuing) {
+                document.getElementById("quit-trigger").click();
+            }
+        });
+    </script>
+
+
+    <div class="button-container">
+        <a href="stimuli" onclick="setContinuing()">
+            <button>
+                Continue to Test
+            </button>
+        </a>
+    </div>
+
+</body>
+
+</html>
