@@ -1,0 +1,186 @@
+{% load static %}
+<html>
+<head>
+    <script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Page Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: skyblue;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .dropdown {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .summary {
+            background-color: #007bff89;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .data-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            font-size: 16px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        .data-table th {
+            background-color: #343a40;
+            color: white;
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .data-table tr:hover {
+            background-color: #e0e0e0;
+        }
+
+        #data-form {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 300px;
+            background-color: #007bff89;
+            padding: 20px;
+        }
+
+        #data-form label {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: white;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        #data-form select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
+            transition: border 0.3s ease;
+            text-align: center;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        #data-output {
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            font-size: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="summary">
+            <h1>Data Summary</h1>
+        </div>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Age</th>
+                    <th>Latency 1</th>
+                    <th>Latency 2</th>
+                    <th>Latency 3</th>
+                    <th>Latency 4</th>
+                    <th>Latency 5</th>
+                    <th>Duration</th>
+                    <th>4-Span</th>
+                    <th>5-Span</th>
+                    <th>Digit</th>
+                    <th>Mixed</th>
+                    <th>Score</th>
+
+                </tr>
+            </thead>
+            <tbody id="data-body">
+                <tr>
+                    <td>{{age}}</td>
+                    <td>{{lat1}}</td>
+                    <td>{{lat2}}</td>
+                    <td>{{lat3}}</td>
+                    <td>{{lat4}}</td>
+                    <td>{{lat5}}</td>
+                    <td>{{duration}}</td>
+                    <td>{{4span}}</td>
+                    <td>{{5span}}</td>
+                    <td>{{digit}}</td>
+                    <td>{{mixed}}</td>
+                    <td>{{score}}</td> 
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    
+<div id="dropdown">
+    <form method="post" id="data-form" 
+      hx-post="{% url 'doctor:datapage' gottenTable %}" 
+      hx-trigger="change" 
+      hx-target="#data-output" 
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    {% csrf_token %}
+    <label for="dropdown">Choose a variable:</label>
+    <select name="update" id="drop">
+        <option value="Latency1">Average Latency 1</option>
+        <option value="Latency2">Average Latency 2</option>
+        <option value="Latency3">Average Latency 3</option>
+        <option value="Latency4">Average Latency 4</option>
+        <option value="Latency5">Average Latency 5</option>
+        <option value="Duration">Average Duration</option>
+        <option value="4SpanScore">Average 4 Span Score</option>
+        <option value="5SpanScore">Average 5 Span Score</option>
+        <option value="ScoreDigit">Average Score Digit</option>
+        <option value="ScoreMixed">Average Score Mixed</option>
+        <option value="Score" selected>Average Score</option>
+    </select>
+    </form>
+</div>
+<div id="data-output">
+    <p>Average: <span id="avg">{{ avg }}</span></p>
+    <p>Standard Deviation: <span id="sd">{{ sd }}</span></p>
+    <p>Percentile: <span id="percentile">{{ percentile }}</span></p>
+    <div id="graph">
+        <img id="graph" src="data:image/png;base64,{{ graph }}" alt="Normal Distribution Plot" />
+    </div>
+    
+</div>
+
+</body>
+</html>
