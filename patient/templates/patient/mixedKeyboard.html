@@ -1,0 +1,222 @@
+<html>
+
+<head>
+    {% load static %}
+    <script src="https://unpkg.com/htmx.org@2.0.2"
+        integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
+        crossorigin="anonymous"></script>
+
+
+    <title>PPST Test</title>
+
+    <style>
+        h1 {
+            font-size: 4vmin;
+            margin: 0;
+            width: 100%;
+            position: fixed;
+            /* Keeps header at the top */
+            top: 0;
+            background-color: white;
+            z-index: 1;
+            /* Ensures the header stays on top */
+        }
+
+        hr {
+            width: 100%;
+            size: 4;
+            color: black;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .continue-button {
+            display: flex;
+            justify-content: center;
+            padding: 3% 0;
+            width: 100%;
+            height: 100%;
+        } 
+        .continue-button button {
+            width: 50%;
+            height: 70%;
+            font-size: 4vmin;
+            margin: 0 auto;
+            border-radius: 2vmin;
+        } 
+        
+        .continue-button button:hover {
+            background-color: #d5d5d5;
+        }
+
+        .btn-group {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            gap: 3%;
+            padding: 1.5% 0;
+            justify-content: center;
+        }
+
+        .btn-group button {
+            width: 50%;
+            height: 100%;
+            font-size: 4vmin;
+            border-radius: 2vmin;
+        }
+
+        .btn-group button:hover {
+            background-color: #d5d5d5;
+        }
+    </style>
+
+
+</head>
+
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+    <h1>
+        Mixed Stimuli
+        <hr style="height: 0.5vw; background-color: black; border: none; width: 100%;">
+
+</h1>
+
+
+<div class="btn-group" style="margin-top: 20vmin">
+    <button id="button2" >5</button>
+    <button id="button3" >3</button>
+    <button id="button4" >8</button>
+    <button id="button5" >4</button>
+  </div>
+  <div class="btn-group">
+    <button id="button6" >7</button>
+    <button id="button7" >2</button>
+    <button id="button8" >6</button>
+    <button id="button9" >9</button>
+  </div>
+
+  <div class="btn-group">
+    <button id="buttonJ" >J</button>
+    <button id="buttonR" >R</button>
+    <button id="buttonW" >W</button>
+    <button id="buttonY" >Y</button>
+  </div>
+  <div class="btn-group">
+    <button id="buttonF" >F</button>
+    <button id="buttonS" >S</button>
+    <button id="buttonK" >K</button>
+    <button id="buttonU" >U</button>
+  </div>
+
+  <script>
+
+    // Record the click on a response button 
+    function record(buttonID) {
+            return function () {
+                const button = document.getElementById(buttonID);
+                const originalColor = button.style.backgroundColor;
+
+                button.style.backgroundColor = "#ADD8E6"; 
+
+                setTimeout(() => {
+                    button.style.backgroundColor = originalColor || "";
+                }, 200);
+
+                id = document.getElementById(buttonID)
+                val = document.getElementById("times").value
+                val = val + ` ${id.innerText}:${Date.now()}`
+                document.getElementById("times").value = val
+                console.log(document.getElementById("times").value)
+            }
+        }
+
+        // Setup record function for response buttons
+        addEventListener("DOMContentLoaded", (event) => {
+            document.getElementById("times").value = `${Date.now()}`
+            document.getElementById("button2").onclick = record("button2")
+            document.getElementById("button3").onclick = record("button3")
+            document.getElementById("button4").onclick = record("button4")
+            document.getElementById("button5").onclick = record("button5")
+            document.getElementById("button6").onclick = record("button6")
+            document.getElementById("button7").onclick = record("button7")
+            document.getElementById("button8").onclick = record("button8")
+            document.getElementById("button9").onclick = record("button9")
+
+            document.getElementById("buttonJ").onclick = record("buttonJ")
+            document.getElementById("buttonR").onclick = record("buttonR")
+            document.getElementById("buttonW").onclick = record("buttonW")
+            document.getElementById("buttonY").onclick = record("buttonY")
+            document.getElementById("buttonF").onclick = record("buttonF")
+            document.getElementById("buttonS").onclick = record("buttonS")
+            document.getElementById("buttonK").onclick = record("buttonK")
+            document.getElementById("buttonU").onclick = record("buttonU")
+
+            document.getElementById("currentSetIndex").value = localStorage.getItem('currentSetIndex')
+        });
+        
+        // grab index
+        let currentSetIndex = parseInt(localStorage.getItem('currentSetIndex'), 10);
+        
+            // function to update header
+        window.onload = function () {
+            const header = document.querySelector('h1');
+            if (currentSetIndex <= 9) {
+                header.childNodes[0].nodeValue = "Mixed Stimuli Practice";
+            } else {
+                header.childNodes[0].nodeValue = "Mixed Stimuli Test";
+            }
+        }
+        function checkRedirect() {
+
+            if (currentSetIndex == 10) {
+                window.location.href = "practiceFinish"; 
+            } else if (currentSetIndex == 16){
+                window.location.href = "conclusion"; 
+            } else {
+                window.location.href = "stimuli"; 
+            }
+         }
+    </script>
+
+    <input id="times" value="" type="hidden" name="times"></input>
+    <input id="currentSetIndex" value="" type="hidden" name="currentSetIndex"></input>
+
+    <div id="quit-trigger" 
+    hx-post="{% url 'patient:isQuit' %}" 
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    style="display:none;"></div>
+
+    <script>
+        let isContinuing = false;
+        function setContinuing() {
+            isContinuing = true;
+        }
+
+        document.getElementById("continue").addEventListener("htmx:afterRequest", () => {
+        setContinuing();
+        });
+        
+        window.addEventListener('beforeunload', function (event) {
+            if (!isContinuing) {
+                document.getElementById("quit-trigger").click();
+            }
+        });
+    </script>
+
+    <div class="continue-button">
+            <button id="continue" hx-trigger="click" hx-post="{% url 'patient:response' %}" hx-include="#times, #currentSetIndex" onclick="checkRedirect(); setContinuing();">
+
+                Continue
+            </button>
+    </div>
+
+</body>
+
+</html>
