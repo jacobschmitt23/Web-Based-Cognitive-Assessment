@@ -1,0 +1,135 @@
+<html>
+
+<head>
+    <script src="https://kit.fontawesome.com/0e9972534c.js" crossorigin="anonymous"></script>
+
+
+    <title>PPST Test</title>
+
+    <style>
+
+        .column {
+            padding: 2vmin;
+            background-color: #f9f9f9; 
+            border-radius: 1vmin; 
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
+            margin: 1vmin;
+        }
+        body {
+            font-size: var(--font-size, 3vmin);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: inherit + 0.5;
+            margin: 0;
+            width: 100%;
+            position: fixed;
+            /* Keeps header at the top */
+            top: 0;
+            background-color: white;
+            z-index: 1;
+            /* Ensures the header stays on top */
+        }
+
+        hr {
+            width: 100%;
+            size: 4;
+            color: black;
+        }
+
+        p {
+            font-size: inherit;
+            margin: 0;
+            padding: 0.5%;
+        }
+
+        .font-size-buttons {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 2;
+        }
+
+        .font-size-buttons button {
+            font-size: inherit;
+            padding: 0.5vmin;
+            margin: 0.2vmin;
+            cursor: pointer;
+        }
+        button i.fas.fa-volume-up {
+            font-size: 2vmin;
+            color: #007bff;
+            transition: color 0.3s ease;
+        }
+
+        button:hover i.fas.fa-volume-up {
+            color: #0056b3;
+        }
+    </style>
+</head>
+
+<body onload="applySavedFontSize()">
+    <div class="font-size-buttons">
+        Adjust font size:
+        <button onclick="increaseFontSize()">+</button>
+        <button onclick="decreaseFontSize()">−</button>
+    </div>
+
+    <h1>
+        Conclusion
+
+        <hr style="height: 0.5vmin; background-color: black; border: none; width: 100%;">
+    </h1>
+
+    <button onclick="playConlusion()" style="font-size:3vmin; background:none; border:none; padding:0; cursor:pointer;">
+        <i class="fas fa-volume-up"></i>
+    </button>
+
+    <div class="column">
+
+        <P>
+            Thank you for taking the PPST Test, You can close the Window at anytime, your test has been recorded
+        </P>
+
+    </div>
+    
+
+    <audio id="conclusion">
+        <source src="/patient/media/audio_conclusion.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        function playConlusion() {
+            var audio = document.getElementById('conclusion');
+            audio.play();
+        }
+    </script>
+
+    <script>
+        function increaseFontSize() {
+            document.body.style.setProperty('--font-size', parseFloat(getComputedStyle(document.body).fontSize) * 1.1 + 'px');
+            localStorage.setItem('fontSize', fontSize);
+        }
+
+        function decreaseFontSize() {
+            document.body.style.setProperty('--font-size', parseFloat(getComputedStyle(document.body).fontSize) / 1.1 + 'px');
+            localStorage.setItem('fontSize', fontSize);
+        }
+
+        function applySavedFontSize() {
+            const savedFontSize = localStorage.getItem('fontSize');
+            if (savedFontSize) {
+                document.body.style.setProperty('--font-size', savedFontSize);
+            }
+        }
+    </script>
+</body>
+
+</html>
