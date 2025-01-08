@@ -1,0 +1,237 @@
+<html>
+
+
+<head>
+    {% load static %}
+    <script src="https://unpkg.com/htmx.org@2.0.2"
+        integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
+        crossorigin="anonymous"></script>
+        
+    <title>Digit Stimuli</title>
+
+
+    <style>
+        h1 {
+            font-size: 4vmin;
+            margin: 0;
+            width: 100%;
+            position: fixed;
+            /* Keeps header at the top */
+            top: 0;
+            background-color: white;
+            z-index: 1;
+            /* Ensures the header stays on top */
+        }
+
+        hr {
+            width: 100%;
+            size: 4;
+            color: black;
+        }
+
+        .stimuli {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50vh;
+            position: relative;
+        }
+
+        .stimuli p {
+            opacity: 0;
+            font-size: 10vw;
+            margin: 0 auto;
+            position: absolute;
+        }
+
+
+        .button-container button {
+            display: flex;
+            justify-content: center;
+            padding: 1.5% 0;
+            width: 30%;
+            font-size: 3vw;
+            margin: 0 auto;
+            border-radius: 2vmin;
+        }
+        .button-container button:hover {
+            background-color: #d5d5d5;
+        }
+
+        @keyframes fadeInAnimation {
+            0% {
+                opacity: 0;
+            }
+
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+
+        @keyframes fadeOutAnimation {
+            0% {
+                opacity: 1;
+            }
+
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .fade-in {
+            animation: fadeInAnimation ease 1s forwards;
+        }
+
+        .fade-out {
+            animation: fadeOutAnimation ease 1s forwards;
+        }
+
+        .hide {
+            animation: fadeOutAnimation ease 0s forwards;
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <h1>
+        Digit Stimuli
+        <hr style="height: 0.5vw; background-color: black; border: none; width: 100%;">
+    </h1>
+
+
+    <div class="stimuli" id="stimuliContainer"></div>
+    
+    <script>
+        const stimuliSets = {{ stimuliJSON|safe }};
+        let currentSetIndex = localStorage.getItem('currentSetIndex') ? parseInt(localStorage.getItem('currentSetIndex'), 10) : 0;
+
+
+        function updateStimuli() {
+            const currentStimulus = stimuliSets[currentSetIndex].givenString; // Access givenString
+            const stimuliContainer = document.getElementById("stimuliContainer");
+            
+            // Clear the container
+            stimuliContainer.innerHTML = '';
+
+            // Create and append new <p> elements for each character in the current stimulus
+            currentStimulus.forEach((char, index) => {
+                const p = document.createElement("p");
+                p.id = index.toString(); // Set the ID
+                p.innerText = char; // Set the text
+                stimuliContainer.appendChild(p); // Add the <p> to the container
+            });
+            
+            if (currentSetIndex == 1){
+                document.getElementById("begin").classList.add('hide'); // hides begin
+                fadeInText();
+            }
+
+             // Update header based on currentSetIndex
+            const header = document.querySelector('h1');
+            if (currentSetIndex <= 1) {
+                header.childNodes[0].nodeValue = "Digit Stimuli Practice";
+            } else if (currentSetIndex <= 7) {
+                document.getElementById("begin").classList.add('hide'); // hides begin
+                header.childNodes[0].nodeValue = "Digit Stimuli Test";
+                fadeInText();
+            } else if (currentSetIndex <= 9) {
+                document.getElementById("begin").classList.add('hide'); // hides begin
+                header.childNodes[0].nodeValue = "Mixed Stimuli Practice";
+                fadeInText();
+            } else {
+                document.getElementById("begin").classList.add('hide'); // hides begin
+                header.childNodes[0].nodeValue = "Mixed Stimuli Test";
+                fadeInText();
+            }
+        }
+
+        function nextSet() {
+            currentSetIndex = (currentSetIndex + 1) % stimuliSets.length; // Cycle through sets
+            updateStimuli(); // Update the displayed stimuli
+            localStorage.setItem('currentSetIndex', currentSetIndex); // Save the index
+        }
+
+        window.onload = function () {
+            updateStimuli(); // Load the first set of stimuli on page load
+        }
+    </script>
+
+    <div id="quit-trigger" 
+    hx-post="{% url 'patient:isQuit' %}" 
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    style="display:none;"></div>
+
+    <script>
+        let isContinuing = false;
+        function setContinuing() {
+            isContinuing = true;
+        }
+        window.addEventListener('beforeunload', function (event) {
+                if (!isContinuing) {
+                    document.getElementById("quit-trigger").click();
+                }
+            });
+    </script>
+
+    <script>
+        function fadeInText() {
+            document.getElementById("begin").classList.add('hide'); // hides begin
+
+            const stimuli = document.querySelectorAll('.stimuli p');
+            let delay = 0;
+
+            stimuli.forEach((element, index) => {
+                setTimeout(() => {
+                    element.classList.add('fade-in');
+                    
+                     // Play the corresponding audio
+                    const audio = new Audio(`media/audio_${element.innerText}.mp3`);
+                    audio.play();
+
+                    // Delay fade out to create pause for each element
+                    setTimeout(() => {
+                        element.classList.remove('fade-in');
+                        element.classList.add('fade-out');
+
+                        if (index === stimuli.length - 1) {
+                            currentSetIndex = (currentSetIndex + 1); // Cycle through sets
+                            localStorage.setItem('currentSetIndex', currentSetIndex); // Save index to localStorage
+                            setContinuing();
+
+                            setTimeout(() => {
+                                 // check which keyboard
+                                 if (currentSetIndex <= 8) {
+                                    window.location.href = "digitKeyboard";
+                                } else {
+                                    window.location.href = "mixedKeyboard";
+                                }
+                            }, 1000); // Allow fade-out time
+                        }
+                    }, 1000); // 1000ms = 1s delay before fade-out
+
+                }, delay);
+
+                delay += 2000; // Increase delay for next element (2s total for fade in and out)
+            });
+        }
+    </script>
+
+<div class="button-container">
+    <button  id="begin" onclick="fadeInText()">
+        Begin Stimuli
+</button>
+
+</div>
+
+
+
+</body>
+
+
+
+</html>
