@@ -1,0 +1,145 @@
+<html>
+    <style type="text/css">
+        body { background: skyblue !important; } /* Adding !important forces the browser to overwrite the default style applied by Bootstrap */
+     </style>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
+</head>
+<div id="generateLink"><br>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <h2 style="text-indent: 15px;">
+        Welcome, {{ usersName }}!
+        <div class="float-end"> <div class= "container-fluid"><div class="float-end">
+            <form action="{% url 'doctor:manageTestLinks' %}" method="post"> {% csrf_token %}
+            <button type="submit" class="btn btn-primary" name="Logout"><i class="bi bi-door-closed-fill"></i>Logout</button>
+        </form> </div></div>
+    </h2> <br style = "line-height:8px;">
+    <hr class="border border border-black border-1 opacity-75">
+    <h2 style="text-indent: 15px;">
+        Manage PPST Test Links<i class="bi bi-clipboard-pulse"></i>
+    </h2>
+    <h5 style="text-indent: 15px;">
+            <div class= "container-fluid"><div class="float-end">
+                <input type="text" id="age" name="age" maxlength="20" hidden></input>
+            <button type="button"
+                name="generateLink"
+                hx-trigger="click[confirmAgeValue()]"
+                hx-post="{% url 'doctor:manageTestLinks' %}"
+                hx-target="#generateLink"
+                hx-include="#age" class="btn btn-outline-success"><i class="bi bi-clipboard-plus"></i> Generate Test Link</button></div></div>
+                <br>
+                <br>
+                <br>
+                <div class= "container-fluid"><div class="float-end">
+                {% if newLinkID %}
+                <button type="button" class="btn btn-secondary" onclick="myFunction('{{ newLinkID }}')"><i class="bi bi-copy"></i> Copy Link</button> Generated Link id: {{ newLinkID }}
+                {% endif %}</div></div>
+        <script>
+            function confirmAgeValue()
+            {   
+                let input = prompt("Enter the age of the patient:");
+                //Force an integer to be given
+                if(input == null)
+                {
+                    return false;
+                }
+                if(isNaN(input) || input < 0)
+                {
+                    confirm("Please provide a non-negative number. Only digits 0-9 are accepted.\r\nPlease Try again.");
+                    return false;
+                }
+
+                document.getElementById("age").value = input;
+                let valueToDisplay = +document.getElementById("age").value;
+                if(confirm("Are you sure you want to generate a new link with associated age?\r\nAge: " + valueToDisplay)) {
+                    return true;
+                }
+            }
+        </script>
+    </h5>
+
+    <body>
+        <br>
+        <hr class="border border-black opacity-75">
+        {% for el in list %} <!--try and get this to send back an input value-->
+            <form action="{% url 'doctor:manageTestLinks' %}" method="post"> {% csrf_token %}
+                <div class="container-fluid" style="font-size: 20px;">Link: {{ el.0 }}
+                <input type="text" href="http://www.mywebsite.com/sample" value=http://127.0.0.1:8000/patient/welcome/{{el.0}} id={{el.0}} disabled hidden>
+                <button type="button" class="btn btn-secondary" onclick="myFunction('{{ el.0 }}')"><i class="bi bi-copy"></i> Copy Link</button>
+
+                {% if el.1 == 'True' %}
+                <span class="badge bg-success"><i class="bi bi-check-square"></i> Complete</span> <div class="float-end">
+                <button type="submit" onclick="confirmDeleteAction('{{ el.0 }}')" name="delete" value={{el.0}} class="btn btn-outline-danger"><i class="bi bi-x-lg"></i> Delete</button>
+                <button type="submit" name="download" value={{el.0}} class="btn btn-outline-success"><i class="bi bi-cloud-download"></i> Download</button>
+                <button type="submit" name="view" value={{el.0}} class="btn btn-outline-primary"><i class="bi bi-eye"></i> View</button> </div>
+                {% elif el.1 == 'False' %}
+                <span class="badge bg-warning text-dark"><i class="bi bi-pencil"></i> Pending</span> <div class="float-end">
+                <button type="submit" onclick="confirmDeleteAction('{{ el.0 }}')" name="delete" value={{el.0}} class="btn btn-outline-danger"><i class="bi bi-x-lg"></i> Delete</button> 
+                <button type="button" class="btn btn-outline-secondary" disabled><i class="bi bi-cloud-download"></i> Download</button>
+                <button type="button" class="btn btn-outline-secondary" disabled><i class="bi bi-eye"></i> View</button></div>
+                {% else %}
+                <span class="badge bg-danger"><i class="bi bi-exclamation-octagon"></i> Test Invalidated</span><div class="float-end">
+                <button type="submit" onclick="confirmDeleteAction('{{ el.0 }}')" name="delete" value={{el.0}} class="btn btn-outline-danger"><i class="bi bi-x-lg"></i> Delete</button> 
+                <button type="button" class="btn btn-outline-secondary" disabled><i class="bi bi-cloud-download"></i> Download</button>
+                <button type="button" class="btn btn-outline-secondary" disabled><i class="bi bi-eye"></i> View</button></div>
+                {% endif %}
+            </form>
+                </div>
+            <hr class="border border-black opacity-75">
+        {% endfor %}
+        
+        <script>
+        function myFunction(inputID) {
+          // Get the text field
+          //var copyText = document.getElementById(inputID);
+
+            var copyText = document.createElement('input'),
+            text = window.location.href;
+
+            document.body.appendChild(copyText);
+            copyText.value = window.location.origin + "/patient/welcome/" + inputID;
+            //copyText.select();
+            //document.execCommand('copy');
+            //document.body.removeChild(copyText);
+        
+          // Select the text field
+          copyText.select();
+          copyText.setSelectionRange(0, 99999); // For mobile devices
+        
+          // Copy the text inside the text field
+          navigator.clipboard.writeText(copyText.value);
+          document.body.removeChild(copyText);
+          // Alert the copied text
+          alert("Copied Link: " + copyText.value + " \nPlease send this to the patient.");
+        }
+        function confirmDeleteAction(inputID)
+        {
+            if(confirm("Are you sure you want to delete the following test ID?: " + inputID)) {
+                    return true;
+                }
+            else
+            {
+                event.preventDefault();
+                return false;
+            }
+        }
+        </script>
+
+    </body>
+    <script>
+        window.addEventListener('beforeunload', function() {
+            localStorage.setItem('scrollPosition', window.scrollY);
+        });
+    </script>
+    <script>
+    window.addEventListener('load', function() {
+        if (localStorage.getItem('scrollPosition')) {
+            window.scrollTo({top: localStorage.getItem('scrollPosition'), left: 0, behavior: 'instant'});
+            localStorage.removeItem('scrollPosition');
+        }
+    });
+</script>
+</body></div>
+</html>
