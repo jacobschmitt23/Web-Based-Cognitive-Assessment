@@ -1,4 +1,10 @@
 # Web-Based-Cognitive-Assessment
+<h3>Project Description</h3>
+  <ol>
+    <li>Web-based application to digitize the Philadelphia Pointing Span Test (PPST) to assess cognitive functions for early detection of neurological disorders. The test is delivered digitally in a user friendly way that allows for efficient calculations and secure tracking of patient metrics. Doctors are able to manage tests created for patients and easily compare patient data in table + graph formats.</li>
+    <li>I was responsible for generating fake data in fixture.py, designing/creating the models and their respective functions, building the bash script, aggregating data, and making the aggregate data sheets in ss.py </li>
+  </ol>
+
 <h3>Set up for PPST</h3>
 
 
@@ -20,7 +26,6 @@
   **Additional Notes**
   
   <ol>
-  <li>I was responsible for generating fake data in fixture.py, designing/creating the models and their respective functions, building the bash script, aggregating data, and making the aggregate data sheets in ss.py</li>
   <li>For download functionality to work, a folder named "temp" should be in the source directory if not generated during runtime.</li>
   <li>For there to be aggregate data the fixture must be run. If not the view data page and spreadsheet will not work properly.</li>
   </ol>
